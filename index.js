@@ -13,6 +13,11 @@ const __dirname = path.dirname(__filename);
 const POSTS_DIR = path.join(__dirname, "src/posts");
 const DIST_DIR = path.join(__dirname, "dist");
 
+console.log("__filename:", __filename);
+console.log("__dirname:", __dirname);
+console.log("postsDir:", POSTS_DIR);
+console.log("distDir:", DIST_DIR);
+
 const converter = new showdown.Converter();
 
 const cleanDist = async () => {
