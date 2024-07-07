@@ -1,88 +1,80 @@
-import fs from "fs-extra";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
 import markdownIt from "markdown-it";
+import createTemplate from "./src/utils/createTemplate.js";
+import generateIndexHtml from "./src/utils/indexHtmlContent.js";
 
-const { readdir, readFile, outputFile, ensureDir } = fs; // Destructure methods from 'fs'
+const { readdir, readFile, writeFile, mkdir, rm } = fs.promises;
 
-// Convert import.meta.url to a file path
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const POSTS_DIR = path.join(__dirname, "src/posts");
 const DIST_DIR = path.join(__dirname, "dist");
 
-const md = new markdownIt(); // Initialize markdown-it
+const md = new markdownIt();
 
-// Define a simple createTemplate function
-const createTemplate = (title, content) => {
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${title}</title>
-    </head>
-    <body>
-      <header>
-        <h1>${title}</h1>
-      </header>
-      <main>
-        ${content}
-      </main>
-      <footer>
-        <a href="./index.html">Back to Index</a>
-      </footer>
-    </body>
-    </html>
-  `;
+const cleanDist = async () => {
+  try {
+    await rm(DIST_DIR, { recursive: true, force: true });
+    console.log(`Removed build directory (dist)`);
+  } catch (err) {
+    console.error(`Error removing build directory (dist):`, err.message);
+    throw err;
+  }
 };
 
 const build = async () => {
-  await ensureDir(DIST_DIR); // Ensure the dist directory exists
+  try {
+    await cleanDist();
+    await mkdir(DIST_DIR, { recursive: true });
 
-  const files = await readdir(POSTS_DIR);
-  const mdFiles = files.filter((file) => file.endsWith(".md"));
+    const mdFiles = await readdir(POSTS_DIR);
 
-  const indexHtmlContent = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Index</title>
-    </head>
-    <body>
-      <header>
-        <h1>Index</h1>
-      </header>
-      <main>
-        <ul>
-          ${mdFiles
-            .map((file) => {
-              const title = file.replace(".md", "");
-              return `<li><a href="./${title}.html">${title}</a></li>`;
-            })
-            .join("\n")}
-        </ul>
-      </main>
-    </body>
-    </html>
-  `;
+    const indexHtmlContent = await generateIndexHtml(POSTS_DIR, DIST_DIR);
+    const indexFilePath = path.join(DIST_DIR, "index.html");
+    await writeFile(indexFilePath, indexHtmlContent, "utf-8");
 
-  const indexFilePath = path.join(DIST_DIR, "index.html");
-  await outputFile(indexFilePath, indexHtmlContent);
+    for (const file of mdFiles) {
+      try {
+        if (file.endsWith(".md")) {
+          const filePath = path.join(POSTS_DIR, file);
+          const content = await readFile(filePath, "utf-8");
 
-  for (const file of mdFiles) {
-    const filePath = path.join(POSTS_DIR, file);
-    const content = await readFile(filePath, "utf-8");
-    const htmlContent = md.render(content); // Render Markdown to HTML
-    const title = file.replace(".md", "");
-    const html = createTemplate(title, htmlContent);
+          if (!content) {
+            console.warn(`File ${file} is empty or could not be read.`);
+            continue;
+          }
 
-    const outputFilePath = path.join(DIST_DIR, `${title}.html`);
-    await outputFile(outputFilePath, html);
+          const htmlContent = md.render(content);
+
+          if (!htmlContent) {
+            console.warn(`Markdown rendering failed for file ${file}.`);
+            continue;
+          }
+
+          const title = file.replace(".md", "");
+          const html = createTemplate(title, htmlContent);
+
+          if (!html) {
+            console.warn(`Template creation failed for file ${file}.`);
+            continue;
+          }
+
+          const outputFilePath = path.join(DIST_DIR, `${title}.html`);
+          await writeFile(outputFilePath, html, "utf-8");
+        } else {
+          console.log(`Skipped file: ${file} (not a Markdown file)`);
+        }
+      } catch (err) {
+        console.error(`Error processing file ${file}:`, err.message);
+      }
+    }
+
+    console.log("Static site successfully built!");
+  } catch (err) {
+    console.error("Error during static site generation:", err.message);
   }
 };
 

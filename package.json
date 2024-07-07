@@ -13,7 +13,10 @@
   "dependencies": {
     "fs-extra": "^11.2.0",
     "markdown-it": "^14.1.0",
-    "marked": "^13.0.2",
     "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/markdown-it": "^14.1.1"
   }
 }
