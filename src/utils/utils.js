@@ -21,7 +21,7 @@ export const copyDirectory = async (srcDir, destDir) => {
   try {
     await ensureDir(destDir);
     await copy(srcDir, destDir);
-    console.log(`Copied ${srcDir} to ${destDir}`);
+    console.log(`Copied from src to dist`);
   } catch (err) {
     console.error(`Error copying ${srcDir} to ${destDir}`, err.message);
     throw err;
@@ -48,19 +48,20 @@ export const generateIndexHtml = async (postsDir, distDir) => {
       return;
     }
 
-    const lastPostFile = sortedFiles[0];
-    const lastPostFilePath = path.join(postsDir, lastPostFile);
-    const lastPostContent = await readFile(lastPostFilePath, "utf-8");
-
-    const lastPostHtmlContent = converter.makeHtml(lastPostContent);
-    const lastPostTitle = lastPostFile.replace(".md", "");
+    const postDetails = await Promise.all(
+      sortedFiles.slice(0, 9).map(async (file) => {
+        const filePath = path.join(postsDir, file);
+        const content = await readFile(filePath, "utf-8");
+        const htmlContent = converter.makeHtml(content); // Convert Markdown to HTML
+        const title = file.replace(".md", "");
+        return { title, content: htmlContent };
+      })
+    );
 
     const indexHtml = await ejs.renderFile(
       path.join(path.dirname(postsDir), "templates/index.ejs"),
       {
-        lastPostTitle,
-        lastPostHtmlContent,
-        sortedFiles,
+        posts: postDetails,
       }
     );
 
@@ -69,17 +70,12 @@ export const generateIndexHtml = async (postsDir, distDir) => {
 
     console.log("Successfully generated index.html");
 
-    for (const file of sortedFiles) {
-      const filePath = path.join(postsDir, file);
-      const content = await readFile(filePath, "utf-8");
-      const htmlContent = converter.makeHtml(content);
-      const title = file.replace(".md", "");
-      const otherPostsHtml = sortedFiles
-        .filter((otherFile) => otherFile !== file)
-        .map((otherFile) => {
-          const otherTitle = otherFile.replace(".md", "");
-          return `<li><a href="./${otherTitle}.html">${otherTitle}</a></li>`;
-        })
+    for (const { title, content } of postDetails) {
+      const otherPostsHtml = postDetails
+        .filter((post) => post.title !== title)
+        .map(
+          (post) => `<li><a href="./${post.title}.html">${post.title}</a></li>`
+        )
         .join("\n");
 
       const html = await ejs.renderFile(
@@ -87,7 +83,7 @@ export const generateIndexHtml = async (postsDir, distDir) => {
         {
           title,
           header: title,
-          content: htmlContent,
+          content, // Ensure content is passed as HTML
           otherPostsHtml,
         }
       );

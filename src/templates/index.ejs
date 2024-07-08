@@ -8,24 +8,19 @@
     <link rel="stylesheet" href="./assets/css/navbar.css" />
   </head>
   <body>
-    <%- include('partials/header') %>
+    <%- include('partials/navbar') %>
     <main>
-      <section>
-        <h2>Last Blog Post: <%= lastPostTitle %></h2>
-        <div><%- lastPostHtmlContent %></div>
-      </section>
-      <section>
-        <h2>All Blog Posts</h2>
-        <ul>
-          <% sortedFiles.forEach(function(file) { %>
-          <li>
-            <a href="./<%= file.replace('.md', '') %>.html"
-              ><%= file.replace('.md', '') %></a
-            >
-          </li>
-          <% }); %>
-        </ul>
-      </section>
+      <div class="posts-container">
+        <% posts.forEach(post => { %>
+        <div class="post-card">
+          <h2><%= post.title %></h2>
+          <div class="post-content">
+            <%= post.content.replace(/<[^>]*>?/gm, '').substring(0, 200) %>...
+            <a href="./<%= post.title %>.html">Read more</a>
+          </div>
+        </div>
+        <% }) %>
+      </div>
     </main>
     <script src="./assets/script/navbar.js"></script>
   </body>

@@ -1,8 +1,6 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const hamburgerMenu = document.querySelector(".hamburger-menu");
-  const nav = document.querySelector("nav");
+const hamburger = document.querySelector(".hamburger");
+const navLink = document.querySelector(".nav__link");
 
-  hamburgerMenu.addEventListener("click", function () {
-    nav.classList.toggle("open");
-  });
+hamburger.addEventListener("click", () => {
+  navLink.classList.toggle("hide");
 });

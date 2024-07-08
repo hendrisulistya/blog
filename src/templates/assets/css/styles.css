@@ -73,6 +73,41 @@ code {
   color: #333;
 }
 
+.posts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.post-card {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 5px;
+  background: #fff;
+}
+
+.post-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.post-card .post-content {
+  font-size: 1rem;
+  color: #555;
+}
+
+.post-card a {
+  display: inline-block;
+  margin-top: 10px;
+  color: #117964;
+  text-decoration: none;
+}
+
+.post-card a:hover {
+  text-decoration: underline;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   pre {
