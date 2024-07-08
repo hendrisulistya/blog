@@ -1,0 +1,75 @@
+/* nav styles */
+@import url("https://fonts.googleapis.com/css2?family=Sen:wght@700&display=swap");
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 50px;
+  box-shadow: 0 1px 8px #ddd;
+}
+
+#nav-title {
+  font-size: 1.5em;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+}
+
+nav li {
+  padding: 0 20px;
+}
+
+nav a {
+  text-decoration: none;
+  color: #555;
+  transition: all 0.3s ease 0s;
+}
+
+nav a:hover {
+  color: #b2dfdb;
+}
+
+/* Hamburger Menu Styles */
+.hamburger-menu {
+  display: none; /* Initially hide for desktop */
+}
+
+/* Media Query for Responsive Design */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  nav {
+    margin-top: 20px; /* Space between title and menu on mobile */
+  }
+
+  nav ul {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  nav li {
+    padding: 10px 0;
+  }
+
+  .hamburger-menu {
+    display: block; /* Show hamburger icon on mobile */
+    cursor: pointer;
+  }
+
+  nav {
+    display: none; /* Hide nav links by default on mobile */
+  }
+
+  nav.open {
+    display: block; /* Show nav links when menu is open on mobile */
+  }
+}
