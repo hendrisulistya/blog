@@ -95,6 +95,7 @@ code {
 .post-card .post-content {
   font-size: 1rem;
   color: #555;
+  text-align: justify;
 }
 
 .post-card a {
@@ -105,7 +106,7 @@ code {
 }
 
 .post-card a:hover {
-  text-decoration: underline;
+  color: #1b967d;
 }
 
 /* Responsive adjustments */

@@ -2,10 +2,31 @@ import fs from "fs-extra";
 import path from "path";
 import showdown from "showdown";
 import ejs from "ejs";
+import { JSDOM } from "jsdom";
 
 const { readdir, readFile, writeFile, ensureDir, remove, copy } = fs;
 
 const converter = new showdown.Converter();
+
+const extractSummary = (html, limit) => {
+  const dom = new JSDOM(html);
+  const document = dom.window.document;
+
+  // Remove the first header (assuming it is the title)
+  const firstHeader = document.querySelector("h1");
+  if (firstHeader) {
+    firstHeader.remove();
+  }
+
+  // Remove the line containing "Last Updated"
+  const lastUpdatedLine = document.querySelector("em");
+  if (lastUpdatedLine) {
+    lastUpdatedLine.remove();
+  }
+
+  const textContent = document.body.textContent || "";
+  return textContent.substring(0, limit);
+};
 
 export const cleanDist = async (distDir) => {
   try {
@@ -62,6 +83,7 @@ export const generateIndexHtml = async (postsDir, distDir) => {
       path.join(path.dirname(postsDir), "templates/index.ejs"),
       {
         posts: postDetails,
+        extractSummary, // Pass the function here
       }
     );
 

@@ -13,9 +13,13 @@
       <div class="posts-container">
         <% posts.forEach(post => { %>
         <div class="post-card">
-          <h2><%= post.title %></h2>
+          <h2>
+            <a href="./<%= post.title %>.html"
+              ><%= post.title.replace(/_/gm, ' ') %></a
+            >
+          </h2>
           <div class="post-content">
-            <%= post.content.replace(/<[^>]*>?/gm, '').substring(0, 200) %>...
+            <%- extractSummary(post.content, 200) %>...
             <a href="./<%= post.title %>.html">Read more</a>
           </div>
         </div>
