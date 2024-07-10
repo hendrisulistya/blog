@@ -96,7 +96,13 @@ export const generateIndexHtml = async (postsDir, distDir) => {
       const otherPostsHtml = postDetails
         .filter((post) => post.title !== title)
         .map(
-          (post) => `<li><a href="./${post.title}.html">${post.title}</a></li>`
+          (post) =>
+            `<div class="post-card">
+               <a href="./${post.title}.html">${post.title.replace(
+              /_/gm,
+              " "
+            )}</a>
+             </div>`
         )
         .join("\n");
 
