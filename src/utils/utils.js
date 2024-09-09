@@ -3,6 +3,7 @@ import path from "path";
 import showdown from "showdown";
 import ejs from "ejs";
 import { JSDOM } from "jsdom";
+import { exec } from "child_process";
 
 const { readdir, readFile, writeFile, ensureDir, remove, copy } = fs;
 
@@ -12,13 +13,11 @@ const extractSummary = (html, limit) => {
   const dom = new JSDOM(html);
   const document = dom.window.document;
 
-  // Remove the first header (assuming it is the title)
   const firstHeader = document.querySelector("h1");
   if (firstHeader) {
     firstHeader.remove();
   }
 
-  // Remove the line containing "Last Updated"
   const lastUpdatedLine = document.querySelector("em");
   if (lastUpdatedLine) {
     lastUpdatedLine.remove();
@@ -127,4 +126,23 @@ export const generateIndexHtml = async (postsDir, distDir) => {
     console.error("Error during static site generation:", err.message);
     throw err;
   }
+};
+
+export const clonePostsRepo = async (postsDir, repoUrl) => {
+  return new Promise((resolve, reject) => {
+    exec(
+      `rm -rf ${postsDir} && git clone ${repoUrl} ${postsDir}`,
+      (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error cloning posts repository: ${error.message}`);
+          return reject(error);
+        }
+        if (stderr) {
+          console.error(`Clone stderr: ${stderr}`);
+        }
+        console.log(`Clone stdout: ${stdout}`);
+        resolve(stdout);
+      }
+    );
+  });
 };
